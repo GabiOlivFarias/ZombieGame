@@ -1,10 +1,24 @@
-from flask import Flask, render_template_string
+import pgzrun
+import random
+from pgzhelper import *
 
-app = Flask(__name__)
+#dimensões da tela
+WIDTH = 800
+HEIGHT = 600
 
-@app.route("/")
-def game():
-     return "<h1>Olá Jogador</h1>"
+#cores
+grey = (75, 75, 75)
+brown = ( 71, 34, 18)  
 
-if __name__ == "__main__":
-    app.run(debug=True)
+#Lua
+moon = Actor('lua')
+moon.x = 700
+moon.y = 80
+
+def draw():
+    screen.draw.filled_rect(Rect(0, 0, 800, 500), (grey)) #céu
+    screen.draw.filled_rect(Rect(0, 500, 800, 600), (brown)) #chão
+
+    moon.draw()
+
+pgzrun.go()
