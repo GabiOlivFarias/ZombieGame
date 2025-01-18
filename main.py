@@ -29,20 +29,25 @@ bat.images = ['morcego', 'morcego2', 'morcego3', 'morcego2']
 bat.fps = 7
 
 #movimento menino zombie
-zombie = Actor('meninozombie01')
+zombie = Actor('meninozombie1')
 zombie.x = 100
-zombie.y = 470
-zombie.images = ['meninozombie01', 'meninozombie02', 'meninozombie03', 'meninozombie04', 
-                 'meninozombie05', 'meninozombie06', 'meninozombie07', 'meninozombie08', 'meninozombie09', 'meninozombie10']
+zombie.y = 435
+zombie.images = ['meninozombie1', 'meninozombie2', 'meninozombie3', 'meninozombie4', 
+                 'meninozombie5', 'meninozombie6', 'meninozombie7', 'meninozombie8', 'meninozombie9', 'meninozombie10']
 zombie.fps = 40
 
 velocity = 0
 gravity = 1
 isJumping = False
 
+ghost = Actor('fantasma')
+ghost.x = random.randint(900, 5000)
+ghost.y = random.randint(250, 350)
+
+ghost_collected = False
 
 def update():
-    global velocity, isJumping
+    global velocity, isJumping, ghost_collected
 
     zombie.animate()
 
@@ -53,8 +58,8 @@ def update():
     velocity += gravity
     zombie.y += velocity
 
-    if zombie.y >= 470:
-        zombie.y = 470
+    if zombie.y >= 435:
+        zombie.y = 435
         velocity = 0
         isJumping = False
 
@@ -64,6 +69,17 @@ def update():
         bat.x = random.randint(1000, 15000)
         bat.y = random.randint(100, 250)
 
+    ghost.x -= 5
+    if ghost.x < - 50:
+     ghost.x = random.randint(900, 5000)
+     ghost.y = random.randint(250, 300)
+     ghost_collected = False
+
+    if isJumping and zombie.colliderect(ghost) and not ghost_collected:
+        sounds.collect.play()
+        ghost_collected = True 
+
+
 def draw():
     screen.draw.filled_rect(Rect(0, 0, 800, 500), (grey)) #céu
     screen.draw.filled_rect(Rect(0, 500, 800, 600), (brown)) #chão
@@ -72,5 +88,6 @@ def draw():
     houses.draw()
     bat.draw()
     zombie.draw()
+    ghost.draw()
 
 pgzrun.go()
