@@ -9,6 +9,8 @@ HEIGHT = 600
 #cores
 grey = (75, 75, 75)
 brown = ( 71, 34, 18)  
+red = (255, 67, 53)
+white = (255, 255, 255)
 
 #Lua
 moon = Actor('lua')
@@ -45,9 +47,10 @@ ghost.x = random.randint(900, 5000)
 ghost.y = random.randint(250, 350)
 
 ghost_collected = False
+score = 0
 
 def update():
-    global velocity, isJumping, ghost_collected
+    global velocity, isJumping, ghost_collected, score
 
     zombie.animate()
 
@@ -72,12 +75,13 @@ def update():
     ghost.x -= 5
     if ghost.x < - 50:
      ghost.x = random.randint(900, 5000)
-     ghost.y = random.randint(250, 300)
+     ghost.y = random.randint(200, 280)
      ghost_collected = False
 
     if isJumping and zombie.colliderect(ghost) and not ghost_collected:
         sounds.collect.play()
         ghost_collected = True 
+        score += 5
 
 
 def draw():
@@ -89,5 +93,6 @@ def draw():
     bat.draw()
     zombie.draw()
     ghost.draw()
+    screen.draw.text('Score:' + str(score), (20, 20), color=(red), fontname='zombie', fontsize = 30)
 
 pgzrun.go()
