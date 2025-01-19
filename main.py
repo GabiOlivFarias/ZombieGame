@@ -30,6 +30,10 @@ bat.y = 100
 bat.images = ['morcego', 'morcego2', 'morcego3', 'morcego2']
 bat.fps = 7
 
+#obstáculos
+obstacles = []
+obstacles_timeout = 0
+
 #movimento menino zombie
 zombie = Actor('meninozombie1')
 zombie.x = 100
@@ -50,7 +54,7 @@ ghost_collected = False
 score = 0
 
 def update():
-    global velocity, isJumping, ghost_collected, score
+    global velocity, isJumping, ghost_collected, score, obstacles_timeout
 
     zombie.animate()
 
@@ -83,6 +87,24 @@ def update():
         ghost_collected = True 
         score += 5
 
+        ghost.x = random.randint(900, 1500)
+        ghost.y = random.randint(200, 280)
+
+        #tumbas
+    obstacles_timeout += 1
+    if obstacles_timeout > random.randint(60,700):
+          tombstone = Actor('lapide')
+          tombstone.x = 860
+          tombstone.y = 500
+          obstacles.append(tombstone)
+          obstacles_timeout = 0
+
+    for tombstone in obstacles:
+          tombstone.x -= 8 
+          if tombstone.x < -50:
+               obstacles.remove(tombstone)
+               score += 1
+
 
 def draw():
     screen.draw.filled_rect(Rect(0, 0, 800, 500), (grey)) #céu
@@ -94,5 +116,8 @@ def draw():
     zombie.draw()
     ghost.draw()
     screen.draw.text('Score:' + str(score), (20, 20), color=(red), fontname='zombie', fontsize = 30)
+
+    for tombstone in obstacles:
+        tombstone.draw()
 
 pgzrun.go()
