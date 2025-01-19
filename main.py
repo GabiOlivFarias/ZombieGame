@@ -20,6 +20,7 @@ grey = (75, 75, 75)
 brown = ( 71, 34, 18)  
 red = (255, 67, 53)
 white = (255, 255, 255)
+green = (60, 208, 20)
 
 #Lua
 moon = Actor('lua')
@@ -64,16 +65,23 @@ score = 0
 final_score = 0
 game_over = False
 end_game = False
+win_game = False
 
 def play_lose_sound():
     sounds.losegame.play()
 
-def update():
-    global velocity, isJumping, ghost_collected, score, obstacles_timeout, game_over, end_game, final_score
+def play_victory_sound():
+    sounds.wingame.play()
 
-    if game_over:
+def update():
+    global velocity, isJumping, ghost_collected, score, obstacles_timeout, game_over, end_game, final_score, win_game
+
+    if game_over or win_game:
         if not end_game:
-            clock.schedule_unique(play_lose_sound, 1.5)
+            if game_over:
+                clock.schedule_unique(play_lose_sound, 1.5)
+            if win_game:
+                clock.schedule_unique(play_victory_sound, 0.75)
             pygame.mixer.music.stop()
             end_game = True
         return
@@ -150,12 +158,21 @@ def update():
     if score <= -1:
           game_over = True
 
+    #Vitória
+    if score >= 5:
+          win_game = True
+          final_score = score
+
 
 def draw():
     screen.draw.filled_rect(Rect(0, 0, 800, 500), (grey)) #céu
     screen.draw.filled_rect(Rect(0, 500, 800, 600), (brown)) #chão
 
-    if game_over:
+    if win_game:
+        screen.clear()
+        screen.draw.text('You Win', centerx = 380, centery = 150, color = (green), fontname = 'zombie', fontsize = 80)
+        screen.draw.text('Score: ' + str(score), centerx = 380, centery = 250, color = (white), fontname = 'zombie', fontsize = 60)
+    elif game_over:
         screen.draw.text('Game Over', centerx = 380, centery = 150, color = (red), fontname = 'zombie', fontsize = 80)
         if score >= 0:
           screen.draw.text('Score: ' + str(final_score), centerx = 380, centery = 250, color = (white), fontname = 'zombie', fontsize = 60)
