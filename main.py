@@ -21,6 +21,14 @@ brown = ( 71, 34, 18)
 red = (255, 67, 53)
 white = (255, 255, 255)
 green = (60, 208, 20)
+black = (0, 0, 0)
+yellow = (253, 223, 28)
+
+game_state = "menu"
+
+zombie_menu = Actor('zombiemenu')
+zombie_menu.x = 100
+zombie_menu.y = 435
 
 #Lua
 moon = Actor('lua')
@@ -43,6 +51,7 @@ bat.fps = 7
 #obstáculos
 obstacles = []
 obstacles_timeout = 0
+obstacles_gap = 100
 
 #movimento menino zombie
 zombie = Actor('meninozombie1')
@@ -73,8 +82,31 @@ def play_lose_sound():
 def play_victory_sound():
     sounds.wingame.play()
 
+def adjust_obstacle_speed(base_speed): #bloco personalizado alterando a velocidade de acrdo com a pontuação
+    return base_speed + (score // 5)
+
+def adjust_obstacle_generation_interval():
+    return max(50, 300 - (score * 10))
+
+def start_game():
+    global game_state, score, final_score, game_over, end_game, win_game, obstacles, obstacles_timeout, ghost_collected
+    game_state = "playing"
+    pygame.mixer.music.play(-1)
+    score = 0
+    final_score = 0
+    game_over = False
+    end_game = False
+    win_game = False
+    obstacles = []
+    obstacles_timeout = 0
+    ghost_collected = False
+
 def update():
-    global velocity, isJumping, ghost_collected, score, obstacles_timeout, game_over, end_game, final_score, win_game
+    global velocity, isJumping, ghost_collected, score, obstacles_timeout, game_over, end_game, final_score, win_game, game_state
+
+    if game_state == "menu":
+          zombie_menu.animate()
+          return
 
     if game_over or win_game:
         if not end_game:
@@ -102,14 +134,14 @@ def update():
 
     bat.animate()
     bat.x -= 5 #faz a animação andar até o fim
-    if bat.x < -50:
+    if bat.x < -50: 
         bat.x = random.randint(1000, 15000)
         bat.y = random.randint(200, 250)
 
     ghost.x -= 5
     if ghost.x < - 50:
      ghost.x = random.randint(900, 5000)
-     ghost.y = random.randint(200, 280)
+     ghost.y = random.randint(280, 320)
      ghost_collected = False
 
           
@@ -117,54 +149,51 @@ def update():
         sounds.collect.play()
         ghost_collected = True 
         score += 5
-
         ghost.x = random.randint(900, 1500)
-        ghost.y = random.randint(200, 280)
+        ghost.y = random.randint(280, 320)
 
      #tumbas
     obstacles_timeout += 1
-    if obstacles_timeout > random.randint(60,700):
-          tombstone = Actor('lapide')
-          tombstone.x = 860
-          tombstone.y = 500
-          obstacles.append(tombstone)
-          obstacles_timeout = 0
-
-    for tombstone in obstacles:
-          tombstone.x -= 4 
-          if tombstone.x < -50:
-               obstacles.remove(tombstone)
-               score -= 1
-               game_over = True
-               if end_game == False:
-                   sounds.losegame.play()
-               end_game = True
+    if obstacles_timeout > adjust_obstacle_generation_interval():
+          if len(obstacles) == 0 or (860 - obstacles[-1].x) > obstacle_gap:
+               tombstone = Actor('lapide')
+               tombstone.x = 860
+               tombstone.y = 500
+               obstacles.append(tombstone)
+               obstacles_timeout = 0
 
     for tombstone in obstacles[:]:
-          tombstone.x -= 8  # Move a lápide para a esquerda
-
-        # Detecção de colisão
-          if 110 < tombstone.x < 150: 
-               if zombie.colliderect(tombstone): 
-                    sounds.crash.play()
-                    final_score = score
-                    obstacles.remove(tombstone)
-                    score = 0
-                    game_over = True
-
-          elif tombstone.x < -50: 
+        tombstone.x -= adjust_obstacle_speed(4)  # Velocidade inicial ajustada
+        if tombstone.x < -50:
                obstacles.remove(tombstone)
+
+        if 110 < tombstone.x < 150 and zombie.colliderect(tombstone):
+               sounds.crash.play()
+               final_score = score
+               obstacles.remove(tombstone)
+               score = 0
+               game_over = True
 
     if score <= -1:
           game_over = True
 
-    #Vitória
-    if score >= 5:
+    if score >= 50:
           win_game = True
           final_score = score
 
 
 def draw():
+    if game_state == "menu":
+          screen.clear()
+          zombie_menu.draw()
+          screen.draw.text("Bem-vindo ao Zombie Runnig!", center=(400, 100), color=white, fontname = 'zombie', fontsize=60)
+          screen.draw.text("Regras do jogo:", center=(400, 200), color=white,fontname = 'zombie', fontsize=40)
+          screen.draw.text("- Colete fantasmas para ganhar pontos.", center=(400, 250), color=yellow, fontsize=30)
+          screen.draw.text("- Evite as lápides para não perder o jogo.", center=(400, 300), color=yellow, fontsize=30)
+          screen.draw.text("- Pressione 'Espaço' para pular.", center=(400, 350), color=yellow, fontsize=30)
+          screen.draw.text("Pressione ENTER para começar.", center=(400, 450), color=green, fontname = 'zombie', fontsize=40)
+          return
+    
     screen.draw.filled_rect(Rect(0, 0, 800, 500), (grey)) #céu
     screen.draw.filled_rect(Rect(0, 500, 800, 600), (brown)) #chão
 
@@ -188,5 +217,10 @@ def draw():
 
      for tombstone in obstacles:
           tombstone.draw()
+
+def on_key_down(key):
+     global game_state
+     if game_state == "menu" and key == keys.RETURN:
+          start_game()
 
 pgzrun.go()
