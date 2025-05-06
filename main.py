@@ -29,6 +29,9 @@ zombie_menu = Actor('zombiemenu')
 zombie_menu.x = 370
 zombie_menu.y = 315
 
+#chão
+ground = Actor('chao')
+
 # Lua
 moon = Actor('lua')
 moon.x = 700
@@ -226,7 +229,8 @@ def draw():
         return
 
     screen.draw.filled_rect(Rect(0, 0, 800, 500), grey)
-    screen.draw.filled_rect(Rect(0, 500, 800, 600), brown)
+    ground.pos = (400, 535)
+    ground.draw()
 
     if win_game:
         screen.clear()
