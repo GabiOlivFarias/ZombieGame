@@ -1,7 +1,7 @@
 # ZombieGame
 Desafio de jogo simples utilizando Python utilizando a biblioteca pgzero
 
-##Para rodar:
+## Para rodar:
 - ` sudo apt install python3-pip `
   ## Instalar e ativar o ambiente virtual:
   - ` python3 -m venv venv `
